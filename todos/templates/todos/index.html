@@ -1,0 +1,70 @@
+{% extends 'todos/base.html' %}
+
+{% block title %}
+Todo list
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Add a todo row -->
+  <div class="row">
+    <div class="offset-md-2 col-lg-9">
+      <form method="post" action="{% url 'todos:add_todo' %}">
+        {% csrf_token %}
+        <div class="form-row">
+          <!-- Input for Title -->
+          <div class="col-md-6 mb-3">
+            <input type="text" class="form-control" name="title" placeholder="Todo title" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <!-- Input for Description -->
+          <div class="col-md-6 mb-3">
+            <textarea class="form-control" name="description" placeholder="Todo description" required></textarea>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col-md-6">
+            <button type="submit" name="submit" class="btn btn-outline-primary">
+              Add
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <hr />
+
+  <!-- todo list row -->
+  <div class="row">
+    <div class="offset-md-2 col-lg-6">
+      <div class="list-group">
+        {% for todo in todo_list %}
+        <div class="list-group-item {% if todo.isCompleted %} todo-complete {% endif %}">
+          <form style="display: inline;" method="post" action="{% url 'todos:update_todo' todo.id %}">
+            {% csrf_token %}
+            <!-- Checkbox for isCompleted -->
+            <input type="checkbox" name="isCompleted" onchange="this.form.submit()" 
+              {% if todo.isCompleted %} checked {% endif %} class="todo-status-checkbox" 
+              title="{% if not todo.isCompleted %}Mark as done{% else %}Mark as undone{% endif %}">
+              
+            <!-- Hidden inputs for title and description -->
+            <input type="hidden" name="title" value="{{ todo.title }}">
+            <input type="hidden" name="description" value="{{ todo.description }}">
+          </form>
+          <strong>{{ todo.title }}</strong> - {{ todo.description }}
+          <!-- Add a form to handle deletion -->
+          <form method="post" action="{% url 'todos:delete_todo' todo.id %}" style="display:inline;" class="text-danger">
+            {% csrf_token %}
+            <input type="hidden" name="_method" value="DELETE" class="text-danger">
+            <button type="submit" class="text-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this item?');">
+              <i class="far fa-trash-alt"></i>
+            </button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
